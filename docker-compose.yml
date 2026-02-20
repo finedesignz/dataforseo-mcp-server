@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  wordpress-mcp:
+    build: .
+    image: wordpress-mcp:latest
+    stdin_open: true
+    tty: true
