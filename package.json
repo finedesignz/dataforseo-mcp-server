@@ -1,0 +1,43 @@
+{
+  "name": "wordpress-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for managing WordPress content (posts, pages, media, users, Elementor, taxonomies, comments, settings, plugins, themes, menus, Rank Math SEO)",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "wordpress-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts",
+    "test": "vitest"
+  },
+  "keywords": [
+    "mcp",
+    "wordpress",
+    "rest-api",
+    "elementor",
+    "rankmath",
+    "claude"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.24.0",
+    "p-retry": "^6.2.0",
+    "undici": "^6.11.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "vitest": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
