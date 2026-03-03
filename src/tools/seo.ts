@@ -2,13 +2,14 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WordPressClient } from '../client/wpClient.js';
 import {
-  id, withAuth, buildQuery, ok, err,
+  id, withAuth, buildQuery, ok, err, resolveAuth,
   readOnly, mutation,
-  Auth,
 } from '../utils/validate.js';
 
-const makeClient = (auth: Auth) =>
-  new WordPressClient({ baseUrl: auth.siteUrl, username: auth.username, appPassword: auth.appPassword });
+const makeClient = (rawAuth?: { siteUrl?: string; username?: string; appPassword?: string }) => {
+  const a = resolveAuth(rawAuth);
+  return new WordPressClient({ baseUrl: a.siteUrl, username: a.username, appPassword: a.appPassword });
+};
 
 const RANKMATH_META_PREREQUISITE = [
   'PREREQUISITE: RankMath meta keys must be registered as REST-accessible on the WordPress site.',

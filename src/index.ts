@@ -19,21 +19,36 @@ function createMcpServer(): McpServer {
 }
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 0;
+const MCP_API_KEY = process.env.MCP_API_KEY || '';
 const mode = PORT > 0 ? 'http' : 'stdio';
 
 if (mode === 'http') {
+  if (!MCP_API_KEY) {
+    console.error('WARNING: MCP_API_KEY is not set — the /mcp endpoint is unprotected.');
+  }
+
   // HTTP mode: stateless Streamable HTTP — each request gets a fresh McpServer
   // (the SDK requires a separate Protocol instance per connection)
   const httpServer = createServer(async (req, res) => {
-    // Health check endpoint
+    // Health check endpoint (no auth required)
     if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ status: 'ok', name: SERVER_NAME, version: SERVER_VERSION }));
       return;
     }
 
-    // MCP endpoint
+    // MCP endpoint — require Bearer token when MCP_API_KEY is set
     if (req.method === 'POST' && req.url === '/mcp') {
+      if (MCP_API_KEY) {
+        const authHeader = req.headers['authorization'] || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+        if (token !== MCP_API_KEY) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Unauthorized', message: 'Invalid or missing Bearer token' }));
+          return;
+        }
+      }
+
       const server = createMcpServer();
       const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
       await server.connect(transport);

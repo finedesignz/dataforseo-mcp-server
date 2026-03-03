@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WordPressClient } from '../client/wpClient.js';
-import { id, withAuth, ok, err, readOnly, mutation, Auth } from '../utils/validate.js';
+import { id, withAuth, ok, err, resolveAuth, readOnly, mutation } from '../utils/validate.js';
 
-const makeClient = (auth: Auth) =>
-  new WordPressClient({ baseUrl: auth.siteUrl, username: auth.username, appPassword: auth.appPassword });
+const makeClient = (rawAuth?: { siteUrl?: string; username?: string; appPassword?: string }) => {
+  const a = resolveAuth(rawAuth);
+  return new WordPressClient({ baseUrl: a.siteUrl, username: a.username, appPassword: a.appPassword });
+};
 
 const PREREQUISITE = [
   'PREREQUISITE: The WordPress site must register _elementor_data as a REST-accessible meta field.',

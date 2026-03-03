@@ -3,13 +3,14 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WordPressClient } from '../client/wpClient.js';
 import {
   pagination, fieldsParam,
-  withAuth, buildQuery, ok,
+  withAuth, buildQuery, ok, resolveAuth,
   readOnly, mutation,
-  Auth,
 } from '../utils/validate.js';
 
-const makeClient = (auth: Auth) =>
-  new WordPressClient({ baseUrl: auth.siteUrl, username: auth.username, appPassword: auth.appPassword });
+const makeClient = (rawAuth?: { siteUrl?: string; username?: string; appPassword?: string }) => {
+  const a = resolveAuth(rawAuth);
+  return new WordPressClient({ baseUrl: a.siteUrl, username: a.username, appPassword: a.appPassword });
+};
 
 export function registerSettingsTools(server: McpServer) {
   server.registerTool(

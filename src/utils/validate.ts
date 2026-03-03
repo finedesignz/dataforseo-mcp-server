@@ -25,16 +25,38 @@ export const fieldsParam = z.string().optional()
 // ── Auth ────────────────────────────────────────────────────────────────
 
 export const authSchema = z.object({
-  siteUrl: z.string().url().describe('WordPress site URL (e.g. https://example.com)'),
-  username: z.string().describe('WordPress username'),
-  appPassword: z.string().describe('WordPress Application Password'),
-});
+  siteUrl: z.string().url().optional().describe('WordPress site URL (e.g. https://example.com). Optional if WORDPRESS_URL env var is set.'),
+  username: z.string().optional().describe('WordPress username. Optional if WORDPRESS_USERNAME env var is set.'),
+  appPassword: z.string().optional().describe('WordPress Application Password. Optional if WORDPRESS_APP_PASSWORD env var is set.'),
+}).optional().describe('WordPress credentials. Optional when server is configured with WORDPRESS_URL, WORDPRESS_USERNAME, and WORDPRESS_APP_PASSWORD env vars.');
 
-export type Auth = z.infer<typeof authSchema>;
+export type Auth = { siteUrl: string; username: string; appPassword: string };
+
+/**
+ * Resolves auth credentials by merging per-call values with env var defaults.
+ * Per-call values take precedence (enables multi-site override).
+ * Throws a user-friendly error if any credential is missing.
+ */
+export function resolveAuth(auth?: z.infer<typeof authSchema>): Auth {
+  const siteUrl = auth?.siteUrl || process.env.WORDPRESS_URL || '';
+  const username = auth?.username || process.env.WORDPRESS_USERNAME || '';
+  const appPassword = auth?.appPassword || process.env.WORDPRESS_APP_PASSWORD || '';
+
+  const missing: string[] = [];
+  if (!siteUrl) missing.push('siteUrl (or WORDPRESS_URL env var)');
+  if (!username) missing.push('username (or WORDPRESS_USERNAME env var)');
+  if (!appPassword) missing.push('appPassword (or WORDPRESS_APP_PASSWORD env var)');
+
+  if (missing.length > 0) {
+    throw new Error(`Missing WordPress credentials: ${missing.join(', ')}`);
+  }
+
+  return { siteUrl: siteUrl.replace(/\/+$/, ''), username, appPassword };
+}
 
 /**
  * Wraps a Zod object schema with the auth fields.
- * Every tool receives auth per-call so the server is site-agnostic.
+ * Auth is optional per-call when env vars are configured.
  */
 export function withAuth<T extends z.ZodRawShape>(shape: z.ZodObject<T>) {
   return z.object({ auth: authSchema }).merge(shape);

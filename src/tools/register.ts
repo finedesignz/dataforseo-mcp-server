@@ -8,6 +8,7 @@ import { registerAdminTools } from './admin.js';
 import { registerCustomPostTypeTools } from './custom.js';
 import { registerElementorTools } from './elementor.js';
 import { registerSeoTools } from './seo.js';
+import { registerPageGeneratorProTools } from './pageGeneratorPro.js';
 
 export function registerTools(server: McpServer) {
   registerContentTools(server);          // posts, pages, media (incl. bulk ops, slug lookups)
@@ -19,4 +20,5 @@ export function registerTools(server: McpServer) {
   registerCustomPostTypeTools(server);   // generic custom post type CRUD
   registerElementorTools(server);        // elementor data read/write
   registerSeoTools(server);              // rankmath SEO
+  registerPageGeneratorProTools(server); // Page Generator Pro content groups
 }

@@ -1,8 +1,18 @@
-version: "3.9"
-
 services:
   wordpress-mcp:
     build: .
     image: wordpress-mcp:latest
-    stdin_open: true
-    tty: true
+    environment:
+      - PORT=3580
+      - MCP_API_KEY=${MCP_API_KEY:-}
+      - WORDPRESS_URL=${WORDPRESS_URL:-}
+      - WORDPRESS_USERNAME=${WORDPRESS_USERNAME:-}
+      - WORDPRESS_APP_PASSWORD=${WORDPRESS_APP_PASSWORD:-}
+    ports:
+      - "3580:3580"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3580/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped

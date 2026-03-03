@@ -3,14 +3,15 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WordPressClient } from '../client/wpClient.js';
 import {
   id, pagination, slug, fieldsParam,
-  withAuth, buildQuery, ok,
+  withAuth, buildQuery, ok, resolveAuth,
   readOnly, mutation, destructive,
-  Auth,
 } from '../utils/validate.js';
 import { formatTermSummary } from '../utils/format.js';
 
-const makeClient = (auth: Auth) =>
-  new WordPressClient({ baseUrl: auth.siteUrl, username: auth.username, appPassword: auth.appPassword });
+const makeClient = (rawAuth?: { siteUrl?: string; username?: string; appPassword?: string }) => {
+  const a = resolveAuth(rawAuth);
+  return new WordPressClient({ baseUrl: a.siteUrl, username: a.username, appPassword: a.appPassword });
+};
 
 export function registerTaxonomyTools(server: McpServer) {
   // ─── CATEGORIES ───────────────────────────────────────────────────────

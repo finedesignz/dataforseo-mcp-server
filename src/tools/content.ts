@@ -3,9 +3,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WordPressClient } from '../client/wpClient.js';
 import {
   id, pagination, status, orderDir, fieldsParam,
-  withAuth, buildQuery, ok, err,
+  withAuth, buildQuery, ok, err, resolveAuth,
   readOnly, mutation, destructive,
-  Auth,
 } from '../utils/validate.js';
 import {
   formatPostSummary, formatPostDetail,
@@ -13,8 +12,10 @@ import {
   formatMediaSummary, formatMediaDetail,
 } from '../utils/format.js';
 
-const makeClient = (auth: Auth) =>
-  new WordPressClient({ baseUrl: auth.siteUrl, username: auth.username, appPassword: auth.appPassword });
+const makeClient = (rawAuth?: { siteUrl?: string; username?: string; appPassword?: string }) => {
+  const a = resolveAuth(rawAuth);
+  return new WordPressClient({ baseUrl: a.siteUrl, username: a.username, appPassword: a.appPassword });
+};
 
 export function registerContentTools(server: McpServer) {
   // ─── POSTS ────────────────────────────────────────────────────────────
